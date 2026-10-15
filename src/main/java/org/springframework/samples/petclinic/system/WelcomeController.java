@@ -16,14 +16,28 @@
 
 package org.springframework.samples.petclinic.system;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 class WelcomeController {
 
+	static final String VISITOR_COOKIE = "petclinic_visitor";
+
 	@GetMapping("/")
-	public String welcome() {
+	public String welcome(@CookieValue(name = VISITOR_COOKIE, required = false) String visitorId,
+			HttpServletResponse response) {
+		if (visitorId == null) {
+			Cookie cookie = new Cookie(VISITOR_COOKIE, VisitorTokens.newToken());
+			cookie.setPath("/");
+			cookie.setMaxAge(60 * 60 * 24 * 365);
+			cookie.setHttpOnly(false);
+			cookie.setSecure(false);
+			response.addCookie(cookie);
+		}
 		return "welcome";
 	}
 
